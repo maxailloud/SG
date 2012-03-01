@@ -1,0 +1,11 @@
+{
+    "require": {
+        "php":              	">=5.3",
+        "symfony/class-loader": ">=2.0.10,<2.1-dev",
+        "symfony/console":  	">=2.0.10,<2.1-dev",
+        "symfony/yaml":  	">=2.0.10,<2.1-dev",
+        "twig/twig":  		"1.6.1",
+        "knplabs/knp-menu":     "1.0"
+	
+    }
+}
