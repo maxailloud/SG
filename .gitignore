@@ -1,3 +1,6 @@
 composer.phar
 composer.lock
 vendor
+
+# IDE files
+.idea
