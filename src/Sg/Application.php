@@ -53,7 +53,7 @@ class Application extends BaseApplication
     protected function registerCommands()
     {
         $finder = new Finder();
-        $finder->files()->name('*Command.php')->in('src/Sg/Command');
+        $finder->files()->name('*Command.php')->in(__DIR__ . '/Command');
 
         foreach($finder as $file)
         {
