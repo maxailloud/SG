@@ -74,21 +74,29 @@ class Generator
      */
     public function process()
     {
-        // For each fiile ine the pages directory we generate a html file
+        // For each fiile in the pages directory we generate a html file
 
         $finder = new Component\Finder\Finder();
         $files = $finder->files()->name('*.twig')->in($this->pageDirectory);
 
         $twigLoader = new \Twig_Loader_Filesystem($this->sourceDirectory);
         $twig = new \Twig_Environment($twigLoader, array(
-            'cache' => $this->sourceDirectory . DIRECTORY_SEPARATOR . 'cache',
+            'cache'         => $this->sourceDirectory . DIRECTORY_SEPARATOR . 'cache',
+            'autoescape'    => false
         ));
 
         foreach($files as $file)
         {
-            echo "<pre>";
-            var_dump($file->getFileName());
-            echo "</pre>" . PHP_EOL;
+            $template = $twig->loadTemplate('pages' . DIRECTORY_SEPARATOR . $file->getFileName());
+
+            $destinationFile = $this->destinationDirectory . DIRECTORY_SEPARATOR . str_replace(array('pages' . DIRECTORY_SEPARATOR, '.twig'), array('', '.html'), $template->getTemplateName());
+
+            if(false === file_put_contents($destinationFile, $twig->render('layout.twig', array('content' => $template->render(array())))))
+            {
+                throw new \Exception(sprintf("An error occured while creating file '%s'", $destinationFile));
+            }
+
+            $this->writeResult(self::OUTPUT_OK, sprintf('File added : %s', $destinationFile));
         }
 
         return $this;

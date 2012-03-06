@@ -2,5 +2,8 @@ composer.phar
 composer.lock
 vendor
 
+# cache files
+sample/source/cache/*
+
 # IDE files
 .idea
