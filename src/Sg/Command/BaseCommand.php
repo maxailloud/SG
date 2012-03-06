@@ -32,18 +32,15 @@ abstract class BaseCommand extends SymfonyCommand
      *
      * @param \Symfony\Component\Console\Output\OutputInterface $output The output
      * @param string $taskName A task name
-     * @param bool $more Whether to add a 'more details' message or not
      *
      * @return void
      */
-    protected function writeTaskError($output, $taskName, $more = true)
+    protected function writeTaskError($output, $taskName)
     {
-        $moreText = $more ? ' To get more details, run the command with the "--verbose" option.' : '';
-
         return $this->writeSection($output, array(
             '[SG] Error',
             '',
-            'An error has occured during the "' . $taskName . '" task process.' . $moreText
+            'An error has occured during the "' . $taskName . '" task process.'
         ), 'fg=white;bg=red');
     }
 }

@@ -2,9 +2,10 @@
 
 namespace Sg\Command;
 
+use Sg;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use \Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class GenerateCommand extends BaseCommand
@@ -14,7 +15,8 @@ class GenerateCommand extends BaseCommand
         $this
             ->setName('generate')
             ->setDescription('Generation command')
-            ->addArgument('directory', InputArgument::REQUIRED, 'The target directory')
+            ->addArgument('sourceDirectory', InputArgument::REQUIRED, 'The source directory')
+            ->addArgument('destinationDirectory', InputArgument::REQUIRED, 'The destination directory')
             ->setHelp(<<<EOT
 The <info>generate</info> command generates your files into the given directory.
 
@@ -28,8 +30,18 @@ EOT
         ;
     }
 
+    /**
+     * @param \Symfony\Component\Console\Input\InputInterface $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->writeSection($output, 'Generating files in progress ...');
+        $verbose = $input->getOption('verbose');
+
+        $generator = new \Sg\Generator($input->getArgument('sourceDirectory'), $input->getArgument('destinationDirectory'));
+        $generator
+            ->setOuput($output)
+            ->generate()
+        ;
     }
 }

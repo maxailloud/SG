@@ -29,7 +29,7 @@ class Application extends BaseApplication
      */
     public function __construct()
     {
-        parent::__construct('Sg', Sg::VERSION);
+        parent::__construct('SG', Sg::VERSION);
     }
 
     /**

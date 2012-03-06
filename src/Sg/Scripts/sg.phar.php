@@ -24,6 +24,7 @@ __HALT_COMPILER();
 STUB;
     $phar->setStub($stub);
 
+    //@TODO affiner l'ajout de fichier à l'archive pour ne pas inclure les fichiers git, les fichiers de l'IDE et autre
     $phar->buildFromDirectory(__DIR__  . '/../../..');
 }
 catch(Exception $exception)
