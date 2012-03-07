@@ -6,8 +6,9 @@ use \Symfony\Component;
 
 class Generator
 {
-    const OUTPUT_OK     = '[<info>OK</info>]';
-    const OUTPUT_FAIL   = '[<error>FAIL</error>]';
+    const OUTPUT_OK         = '[<info>OK</info>]';
+    const OUTPUT_FAIL       = '[<error>FAIL</error>]';
+    const OUTPUT_COMMENT    = '[<comment>FAIL</comment>]';
 
     private $sourceDirectory        = null;
     private $destinationDirectory   = null;
@@ -77,11 +78,26 @@ class Generator
         // For each fiile in the pages directory we generate a html file
 
         $finder = new Component\Finder\Finder();
+
+        $this
+            ->processTemplates($finder)
+            ->processMedia($finder->create())
+        ;
+
+        return $this;
+    }
+
+    /**
+     * @param \Symfony\Component\Finder\Finder $finder
+     * @return \Sg\Generator
+     * @throws \Exception
+     */
+    public function processTemplates(Component\Finder\Finder $finder)
+    {
         $files = $finder->files()->name('*.twig')->in($this->pageDirectory);
 
         $twigLoader = new \Twig_Loader_Filesystem($this->sourceDirectory);
         $twig = new \Twig_Environment($twigLoader, array(
-            'cache'         => $this->sourceDirectory . DIRECTORY_SEPARATOR . 'cache',
             'autoescape'    => false
         ));
 
@@ -90,13 +106,62 @@ class Generator
             $template = $twig->loadTemplate('pages' . DIRECTORY_SEPARATOR . $file->getFileName());
 
             $destinationFile = $this->destinationDirectory . DIRECTORY_SEPARATOR . str_replace(array('pages' . DIRECTORY_SEPARATOR, '.twig'), array('', '.html'), $template->getTemplateName());
+            $destinationFileExists = is_file($destinationFile);
 
             if(false === file_put_contents($destinationFile, $twig->render('layout.twig', array('content' => $template->render(array())))))
             {
                 throw new \Exception(sprintf("An error occured while creating file '%s'", $destinationFile));
             }
 
-            $this->writeResult(self::OUTPUT_OK, sprintf('File added : %s', $destinationFile));
+            $this->writeResult(self::OUTPUT_OK, sprintf('File %s : %s', $destinationFileExists ? 'modified' : 'added', $destinationFile));
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param \Symfony\Component\Finder\Finder $finder
+     * @return \Sg\Generator
+     * @throws \Exception
+     */
+    public function processMedia(Component\Finder\Finder $finder)
+    {
+        $mediaDirectory = $this->sourceDirectory . DIRECTORY_SEPARATOR . 'media';
+
+        if(false === is_dir($mediaDirectory))
+        {
+            $this->writeResult(self::OUTPUT_COMMENT, 'No media directory found.');
+            return $this;
+        }
+
+        $files = $finder->in($mediaDirectory);
+
+        $iterator = $finder->getIterator();
+        echo "<pre>";
+        var_dump(count($files));
+        echo "</pre>" . PHP_EOL;
+        echo "<pre>";
+        var_dump(count($files->getIterator()));
+        echo "</pre>" . PHP_EOL;
+        echo "<pre>";
+        var_dump($files->getIterator());
+        echo "</pre>" . PHP_EOL;
+        if(0 === count($files))
+        {
+            $this->writeResult(self::OUTPUT_COMMENT, 'Media directory is empty.');
+        }
+
+        foreach ($iterator as $iterate) {
+            echo "<pre>";
+            var_dump($iterate);
+            echo "</pre>" . PHP_EOL;
+        }
+
+        foreach($files as $directory)
+        {
+            echo "<pre>";
+            var_dump($directory);
+            echo "</pre>" . PHP_EOL;
         }
 
         return $this;
