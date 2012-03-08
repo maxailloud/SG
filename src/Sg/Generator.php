@@ -4,7 +4,7 @@ namespace Sg;
 
 use \Symfony\Component;
 
-class Generator
+class Generator extends \Sg\Outputter
 {
     const OUTPUT_OK         = '[<info>OK</info>]';
     const OUTPUT_FAIL       = '[<error>FAIL</error>]';
@@ -15,28 +15,16 @@ class Generator
     private $layoutFile             = null;
     private $pageDirectory          = null;
 
-    /** @var \Symfony\Component\Console\Output\OutputInterface */
-    private $output = null;
-
     /**
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
      * @param string $sourceDirectory
      * @param string $destinationDirectory
      */
-    public function __construct($sourceDirectory, $destinationDirectory)
+    public function __construct(Component\Console\Output\OutputInterface $output, $sourceDirectory, $destinationDirectory)
     {
+        parent::__construct($output);
         $this->sourceDirectory      = (DIRECTORY_SEPARATOR === substr($sourceDirectory, -1)) ? substr($sourceDirectory, 0, -1) : $sourceDirectory;
         $this->destinationDirectory = (DIRECTORY_SEPARATOR === substr($destinationDirectory, -1)) ? substr($destinationDirectory, 0, -1) : $destinationDirectory;
-    }
-
-    /**
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
-     * @return \Sg\Generator
-     */
-    public function setOuput(Component\Console\Output\OutputInterface $output)
-    {
-        $this->output = $output;
-
-        return $this;
     }
 
     /**
@@ -44,10 +32,7 @@ class Generator
      */
     public function generate()
     {
-        if(null !== $this->output)
-        {
-            $this->output->writeln("<comment>Starting static site generation.</comment>");
-        }
+        $this->writeln("<comment>Starting static site generation.</comment>");
 
         try
         {
@@ -56,181 +41,20 @@ class Generator
                 ->checkDestinationDirectory($this->destinationDirectory)
                 ->checkLayoutFile()
                 ->checkPagesDirectory()
-                ->process()
             ;
+
+            $templateProcessor = new \Sg\Processor\Template($this->getOutput());
+            $templateProcessor->process($this->sourceDirectory, $this->destinationDirectory);
+
+            $mediaProcessor = new \Sg\Processor\Media($this->getOutput());
+            $mediaProcessor->process($this->sourceDirectory, $this->destinationDirectory);
         }
         catch(\Exception $exception)
         {
             $this->writeResult(self::OUTPUT_FAIL, $exception->getMessage());
         }
 
-        if(null !== $this->output)
-        {
-            $this->output->writeln("<comment>Static site generation done.</comment>");
-        }
-    }
-
-    /**
-     * @return \Sg\Generator
-     */
-    public function process()
-    {
-        $finder = new Component\Finder\Finder();
-
-        $templateProcessor = new \Sg\Processor\Template();
-        $templateProcessor->process();
-
-        $mediaProcessor = new \Sg\Processor\Media();
-        $mediaProcessor->process();
-
-        $this
-            ->processTemplates($finder)
-            ->processMedia($finder->create())
-        ;
-
-        return $this;
-    }
-
-    /**
-     * @param \Symfony\Component\Finder\Finder $finder
-     * @return \Sg\Generator
-     * @throws \Exception
-     */
-    public function processTemplates(Component\Finder\Finder $finder)
-    {
-        $files = $finder->files()->name('*.twig')->in($this->pageDirectory);
-
-        $twigLoader = new \Twig_Loader_Filesystem($this->sourceDirectory);
-        $twig = new \Twig_Environment($twigLoader, array(
-            'autoescape'    => false
-        ));
-
-        foreach($files as $file)
-        {
-            $template = $twig->loadTemplate('pages' . DIRECTORY_SEPARATOR . $file->getFileName());
-
-            $destinationFile = $this->destinationDirectory . DIRECTORY_SEPARATOR . str_replace(array('pages' . DIRECTORY_SEPARATOR, '.twig'), array('', '.html'), $template->getTemplateName());
-            $destinationFileExists = is_file($destinationFile);
-
-            if(false === file_put_contents($destinationFile, $twig->render('layout.twig', array('content' => $template->render(array())))))
-            {
-                throw new \Exception(sprintf("An error occured while creating file '%s'", $destinationFile));
-            }
-
-            $this->writeResult(self::OUTPUT_OK, sprintf('File %s : %s', $destinationFileExists ? 'modified' : 'added', $destinationFile));
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param \Symfony\Component\Finder\Finder $finder
-     * @return \Sg\Generator
-     * @throws \Exception
-     */
-    public function processMedia(Component\Finder\Finder $finder)
-    {
-        $mediaDirectory = $this->sourceDirectory . DIRECTORY_SEPARATOR . 'media';
-
-        if(false === is_dir($mediaDirectory))
-        {
-            $this->writeResult(self::OUTPUT_COMMENT, 'No media directory found.');
-            return $this;
-        }
-
-        $files = $finder->in($mediaDirectory);
-
-        foreach($files as $file)
-        {
-            if(true === is_dir($file))
-            {
-                $destinationDirectory = $this->destinationDirectory . DIRECTORY_SEPARATOR . $file->getFileName();
-
-                try
-                {
-                    $this->copyDirectory($file->getPathName(), $destinationDirectory);
-                }
-                catch(\Exception $exception)
-                {
-                    $this->writeResult(self::OUTPUT_FAIL, $exception->getMessage());
-                }
-
-                $this->writeResult(self::OUTPUT_OK, sprintf("Directory '%s' added.", $destinationDirectory));
-            }
-            elseif(true === is_file($file))
-            {
-                $destinationFile = $this->destinationDirectory . DIRECTORY_SEPARATOR . $file->getPathName();
-
-                try
-                {
-                    $this->copyFile($file->getPathName(), $destinationFile);
-                }
-                catch(\Exception $exception)
-                {
-                    $this->writeResult(self::OUTPUT_FAIL, $exception->getMessage());
-                }
-
-                $this->writeResult(self::OUTPUT_OK, sprintf("File '%s' added.", $destinationFile));
-            }
-            else
-            {
-                throw new \Exception(sprintf("Unknown type for '%s'.", $file->getPathName()));
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param string $sourceDirectory
-     * @param string $destinationDIrectory
-     * @return \Sg\Generator
-     */
-    public function copyDirectory($sourceDirectory, $destinationDIrectory)
-    {
-        if(false === is_dir($sourceDirectory))
-        {
-            throw new \Exception(sprintf("'%s' is not a directory.", $sourceDirectory));
-        }
-
-        // Si oui, on l'ouvre
-        if($sourceDirectoryResource = opendir($sourceDirectory))
-        {
-            // On liste les dossiers et fichiers du répertoire source
-            while(($file = readdir($sourceDirectoryResource)) !== false)
-            {
-                // Si le dossier dans lequel on veut coller n'existe pas, on le créé
-                if(!is_dir($destinationDIrectory))
-                {
-                    mkdir($destinationDIrectory, 0777);
-                }
-
-                // S'il s'agit d'un dossier, on relance la fonction récursive
-                if(is_dir($sourceDirectory . $file) && $file != '..'  && $file != '.')
-                {
-                    $this->copyDirectory($sourceDirectory.$file . DIRECTORY_SEPARATOR, $destinationDIrectory.$file . DIRECTORY_SEPARATOR);
-                }
-                // S'il sagit d'un fichier, on le copie simplement
-                elseif($file != '..'  && $file != '.')
-                {
-                    copy($sourceDirectory . $file, $destinationDIrectory . $file);
-                }
-            }
-            // On ferme $dir2copy
-            closedir($sourceDirectoryResource);
-        }
-
-        return $this;
-    }
-
-    public function copyFile($sourceFile, $destinationFile)
-    {
-        if(false === is_file($sourceFile))
-        {
-            throw new \Exception(sprintf("'%s' is not a file.", $sourceFile));
-        }
-
-        // Effectuer la copie
+        $this->writeln("<comment>Static site generation done.</comment>");
     }
 
     /**
@@ -328,20 +152,5 @@ class Generator
         $this->writeResult(self::OUTPUT_OK, sprintf('Destination directory : %s', $this->destinationDirectory));
 
         return $this;
-    }
-
-    /**
-     * @param string $result
-     * @param string $message
-     * @param int $type
-     * @return Generator
-     */
-    private function writeResult($result, $message, $type = 0)
-    {
-        if(null !== $this->output)
-        {
-            $writeMessage = sprintf("%s - %s", str_pad($result, 19, ' ', \STR_PAD_RIGHT), $message);
-            $this->output->writeln($writeMessage, $type);
-        }
     }
 }
