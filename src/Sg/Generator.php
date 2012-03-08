@@ -75,9 +75,13 @@ class Generator
      */
     public function process()
     {
-        // For each fiile in the pages directory we generate a html file
-
         $finder = new Component\Finder\Finder();
+
+        $templateProcessor = new \Sg\Processor\Template();
+        $templateProcessor->process();
+
+        $mediaProcessor = new \Sg\Processor\Media();
+        $mediaProcessor->process();
 
         $this
             ->processTemplates($finder)
@@ -136,35 +140,97 @@ class Generator
 
         $files = $finder->in($mediaDirectory);
 
-        $iterator = $finder->getIterator();
-        echo "<pre>";
-        var_dump(count($files));
-        echo "</pre>" . PHP_EOL;
-        echo "<pre>";
-        var_dump(count($files->getIterator()));
-        echo "</pre>" . PHP_EOL;
-        echo "<pre>";
-        var_dump($files->getIterator());
-        echo "</pre>" . PHP_EOL;
-        if(0 === count($files))
+        foreach($files as $file)
         {
-            $this->writeResult(self::OUTPUT_COMMENT, 'Media directory is empty.');
-        }
+            if(true === is_dir($file))
+            {
+                $destinationDirectory = $this->destinationDirectory . DIRECTORY_SEPARATOR . $file->getFileName();
 
-        foreach ($iterator as $iterate) {
-            echo "<pre>";
-            var_dump($iterate);
-            echo "</pre>" . PHP_EOL;
-        }
+                try
+                {
+                    $this->copyDirectory($file->getPathName(), $destinationDirectory);
+                }
+                catch(\Exception $exception)
+                {
+                    $this->writeResult(self::OUTPUT_FAIL, $exception->getMessage());
+                }
 
-        foreach($files as $directory)
-        {
-            echo "<pre>";
-            var_dump($directory);
-            echo "</pre>" . PHP_EOL;
+                $this->writeResult(self::OUTPUT_OK, sprintf("Directory '%s' added.", $destinationDirectory));
+            }
+            elseif(true === is_file($file))
+            {
+                $destinationFile = $this->destinationDirectory . DIRECTORY_SEPARATOR . $file->getPathName();
+
+                try
+                {
+                    $this->copyFile($file->getPathName(), $destinationFile);
+                }
+                catch(\Exception $exception)
+                {
+                    $this->writeResult(self::OUTPUT_FAIL, $exception->getMessage());
+                }
+
+                $this->writeResult(self::OUTPUT_OK, sprintf("File '%s' added.", $destinationFile));
+            }
+            else
+            {
+                throw new \Exception(sprintf("Unknown type for '%s'.", $file->getPathName()));
+            }
         }
 
         return $this;
+    }
+
+    /**
+     * @param string $sourceDirectory
+     * @param string $destinationDIrectory
+     * @return \Sg\Generator
+     */
+    public function copyDirectory($sourceDirectory, $destinationDIrectory)
+    {
+        if(false === is_dir($sourceDirectory))
+        {
+            throw new \Exception(sprintf("'%s' is not a directory.", $sourceDirectory));
+        }
+
+        // Si oui, on l'ouvre
+        if($sourceDirectoryResource = opendir($sourceDirectory))
+        {
+            // On liste les dossiers et fichiers du répertoire source
+            while(($file = readdir($sourceDirectoryResource)) !== false)
+            {
+                // Si le dossier dans lequel on veut coller n'existe pas, on le créé
+                if(!is_dir($destinationDIrectory))
+                {
+                    mkdir($destinationDIrectory, 0777);
+                }
+
+                // S'il s'agit d'un dossier, on relance la fonction récursive
+                if(is_dir($sourceDirectory . $file) && $file != '..'  && $file != '.')
+                {
+                    $this->copyDirectory($sourceDirectory.$file . DIRECTORY_SEPARATOR, $destinationDIrectory.$file . DIRECTORY_SEPARATOR);
+                }
+                // S'il sagit d'un fichier, on le copie simplement
+                elseif($file != '..'  && $file != '.')
+                {
+                    copy($sourceDirectory . $file, $destinationDIrectory . $file);
+                }
+            }
+            // On ferme $dir2copy
+            closedir($sourceDirectoryResource);
+        }
+
+        return $this;
+    }
+
+    public function copyFile($sourceFile, $destinationFile)
+    {
+        if(false === is_file($sourceFile))
+        {
+            throw new \Exception(sprintf("'%s' is not a file.", $sourceFile));
+        }
+
+        // Effectuer la copie
     }
 
     /**
