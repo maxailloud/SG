@@ -4,6 +4,12 @@ namespace Sg\Processor;
 
 class Template extends \Sg\Outputter
 {
+    /**
+     * @param string $sourceDirectory
+     * @param string $destinationDirectory
+     * @return \Sg\Processor\Template
+     * @throws \Exception
+     */
     public function process($sourceDirectory, $destinationDirectory)
     {
         $finder = new \Symfony\Component\Finder\Finder();

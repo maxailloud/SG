@@ -4,6 +4,9 @@ namespace Sg\Processor;
 
 class Media extends \Sg\Outputter
 {
+    /** @var \Symfony\Component\Finder\Finder */
+    private $finder = null;
+
     /**
      * @param $sourceDirectory
      * @param $destinationDirectory
@@ -20,8 +23,8 @@ class Media extends \Sg\Outputter
             return $this;
         }
 
-        $finder = new \Symfony\Component\Finder\Finder();
-        $files = $finder->depth(0)->in($mediaDirectory);
+        $this->finder = new \Symfony\Component\Finder\Finder();
+        $files = $this->finder->depth(0)->in($mediaDirectory);
 
         foreach($files as $file)
         {
@@ -73,36 +76,30 @@ class Media extends \Sg\Outputter
             throw new \Exception(sprintf("'%s' is not a directory.", $sourceDirectory));
         }
 
-        // Si oui, on l'ouvre
-        if($sourceDirectoryResource = opendir($sourceDirectory))
+        $finder = $this->finder->create();
+        $files = $finder->depth(0)->in($sourceDirectory);
+
+        foreach($files as $file)
         {
-            // On liste les dossiers et fichiers du répertoire source
-            while(($file = readdir($sourceDirectoryResource)) !== false)
+            if(true === is_dir($file))
             {
-                // Si le dossier dans lequel on veut coller n'existe pas, on le créé
-                if(false === is_dir($destinationDirectory))
+                if(false === mkdir($destinationDirectory, 0777))
                 {
-                    if(false === mkdir($destinationDirectory, 0777))
-                    {
-                        throw new \Exception(sprintf("An error occured while adding '%s'.", $destinationDirectory));
-                    }
-
-                    $this->writeResult(self::OUTPUT_OK, sprintf("Directory '%s' added.", $destinationDirectory));
+                    throw new \Exception(sprintf("An error occured while adding '%s'.", $destinationDirectory));
                 }
 
-                // S'il s'agit d'un dossier, on relance la fonction récursive
-                if(is_dir($sourceDirectory . $file) && $file != '..'  && $file != '.')
-                {
-                    $this->copyDirectory($sourceDirectory . DIRECTORY_SEPARATOR. $file, $destinationDirectory . DIRECTORY_SEPARATOR . $file);
-                }
-                // S'il sagit d'un fichier, on le copie simplement
-                elseif($file != '..'  && $file != '.')
-                {
-                    $this->copyFile($sourceDirectory . DIRECTORY_SEPARATOR . $file, $destinationDirectory . DIRECTORY_SEPARATOR . $file);
-                }
+                $this->writeResult(self::OUTPUT_OK, sprintf("Directory '%s' added.", $destinationDirectory));
+
+                $this->copyDirectory($sourceDirectory . DIRECTORY_SEPARATOR . $file, $destinationDirectory . DIRECTORY_SEPARATOR . $file);
             }
-            // On ferme $dir2copy
-            closedir($sourceDirectoryResource);
+            elseif(true === is_file($file))
+            {
+                $this->copyFile($sourceDirectory . DIRECTORY_SEPARATOR . $file, $destinationDirectory . DIRECTORY_SEPARATOR . $file);
+            }
+            else
+            {
+                throw new \Exception(sprintf("Unknown type for '%s'.", $file->getPathName()));
+            }
         }
 
         return $this;
