@@ -23,8 +23,8 @@ class Media extends \Sg\Outputter
             return $this;
         }
 
-        $this->finder = new \Symfony\Component\Finder\Finder();
-        $files = $this->finder->depth(0)->in($mediaDirectory);
+        $this->finder   = new \Symfony\Component\Finder\Finder();
+        $files          = $this->finder->depth(0)->in($mediaDirectory);
 
         foreach($files as $file)
         {
@@ -76,25 +76,36 @@ class Media extends \Sg\Outputter
             throw new \Exception(sprintf("'%s' is not a directory.", $sourceDirectory));
         }
 
-        $finder = $this->finder->create();
-        $files = $finder->depth(0)->in($sourceDirectory);
+        if(false === is_dir($destinationDirectory))
+        {
+            if(false === mkdir($destinationDirectory, 0777))
+            {
+                throw new \Exception(sprintf("An error occured while adding '%s'.", $destinationDirectory));
+            }
+            $this->writeResult(self::OUTPUT_OK, sprintf("Directory '%s' added.", $destinationDirectory));
+        }
 
+        $finder = $this->finder->create();
+        $files  = $finder->depth(0)->in($sourceDirectory);
+
+        /** @var $file \Symfony\Component\Finder\SplFileInfo */
         foreach($files as $file)
         {
             if(true === is_dir($file))
             {
-                if(false === mkdir($destinationDirectory, 0777))
-                {
-                    throw new \Exception(sprintf("An error occured while adding '%s'.", $destinationDirectory));
-                }
+                $fileRelativePathname   = $file->getRelativePathname();
+                $source                 = $sourceDirectory . DIRECTORY_SEPARATOR . $fileRelativePathname;
+                $destination            = $destinationDirectory . DIRECTORY_SEPARATOR . $fileRelativePathname;
 
-                $this->writeResult(self::OUTPUT_OK, sprintf("Directory '%s' added.", $destinationDirectory));
-
-                $this->copyDirectory($sourceDirectory . DIRECTORY_SEPARATOR . $file, $destinationDirectory . DIRECTORY_SEPARATOR . $file);
+                $this->copyDirectory($source, $destination);
             }
             elseif(true === is_file($file))
             {
-                $this->copyFile($sourceDirectory . DIRECTORY_SEPARATOR . $file, $destinationDirectory . DIRECTORY_SEPARATOR . $file);
+                $fileName           = $file->getBasename();
+                $sourceFile         = $sourceDirectory . DIRECTORY_SEPARATOR . $fileName;
+                $destinationFile    = $destinationDirectory . DIRECTORY_SEPARATOR . $fileName;
+
+                $this->copyFile($sourceFile, $destinationFile);
             }
             else
             {
@@ -119,6 +130,7 @@ class Media extends \Sg\Outputter
         }
 
         $destinationFileExists = is_file($destinationFile);
+
         if(false === copy($sourceFile, $destinationFile))
         {
             throw new \Exception(sprintf("An error occured while %s '%s'.", (true === $destinationFileExists) ? 'modifying' : 'adding', $destinationFile));
