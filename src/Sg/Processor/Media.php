@@ -2,6 +2,10 @@
 
 namespace Sg\Processor;
 
+use Assetic\Asset\AssetCollection;
+use Assetic\Asset\FileAsset;
+use Assetic\Asset\GlobAsset;
+
 class Media extends \Sg\Outputter
 {
     /** @var \Symfony\Component\Finder\Finder */
@@ -15,6 +19,17 @@ class Media extends \Sg\Outputter
      */
     public function process($sourceDirectory, $destinationDirectory)
     {
+        $js = new AssetCollection(array(
+            new GlobAsset($sourceDirectory . DIRECTORY_SEPARATOR . 'media' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . '*'),
+            new FileAsset($sourceDirectory . DIRECTORY_SEPARATOR . 'media' . DIRECTORY_SEPARATOR . 'script.js'),
+        ));
+
+        // the code is merged when the asset is dumped
+        echo "<pre>";
+        var_dump($js->dump());
+        echo "</pre>" . PHP_EOL;
+        die("SSSSSTTTTTTOOOOOOPPPPPPP" . PHP_EOL);
+
         $mediaDirectory = $sourceDirectory . DIRECTORY_SEPARATOR . 'media';
 
         if(false === is_dir($mediaDirectory))
