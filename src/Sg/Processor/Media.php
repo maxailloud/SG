@@ -4,6 +4,12 @@ namespace Sg\Processor;
 
 class Media extends \Sg\Outputter
 {
+    /**
+     * @param $sourceDirectory
+     * @param $destinationDirectory
+     * @throws \Exception
+     * @return \Sg\Processor\Media
+     */
     public function process($sourceDirectory, $destinationDirectory)
     {
         $mediaDirectory = $sourceDirectory . DIRECTORY_SEPARATOR . 'media';
@@ -15,7 +21,7 @@ class Media extends \Sg\Outputter
         }
 
         $finder = new \Symfony\Component\Finder\Finder();
-        $files = $finder->in($mediaDirectory);
+        $files = $finder->depth(0)->in($mediaDirectory);
 
         foreach($files as $file)
         {
@@ -31,15 +37,10 @@ class Media extends \Sg\Outputter
                 {
                     $this->writeResult(self::OUTPUT_FAIL, $exception->getMessage());
                 }
-
-                $this->writeResult(self::OUTPUT_OK, sprintf("Directory '%s' added.", $directory));
             }
             elseif(true === is_file($file))
             {
-                $destinationFile = $destinationDirectory . DIRECTORY_SEPARATOR . $file->getPathName();
-                echo "<pre>";
-                var_dump($destinationFile);
-                echo "</pre>" . PHP_EOL;
+                $destinationFile = $destinationDirectory . DIRECTORY_SEPARATOR . $file->getRelativePathName();
 
                 try
                 {
@@ -49,8 +50,6 @@ class Media extends \Sg\Outputter
                 {
                     $this->writeResult(self::OUTPUT_FAIL, $exception->getMessage());
                 }
-
-                $this->writeResult(self::OUTPUT_OK, sprintf("File '%s' added.", $destinationFile));
             }
             else
             {
@@ -65,7 +64,7 @@ class Media extends \Sg\Outputter
      * @param string $sourceDirectory
      * @param string $destinationDirectory
      * @throws \Exception
-     * @return \Sg\Generator
+     * @return \Sg\Processor\Media
      */
     public function copyDirectory($sourceDirectory, $destinationDirectory)
     {
@@ -83,7 +82,12 @@ class Media extends \Sg\Outputter
                 // Si le dossier dans lequel on veut coller n'existe pas, on le créé
                 if(false === is_dir($destinationDirectory))
                 {
-                    mkdir($destinationDirectory, 0777);
+                    if(false === mkdir($destinationDirectory, 0777))
+                    {
+                        throw new \Exception(sprintf("An error occured while adding '%s'.", $destinationDirectory));
+                    }
+
+                    $this->writeResult(self::OUTPUT_OK, sprintf("Directory '%s' added.", $destinationDirectory));
                 }
 
                 // S'il s'agit d'un dossier, on relance la fonction récursive
@@ -104,6 +108,12 @@ class Media extends \Sg\Outputter
         return $this;
     }
 
+    /**
+     * @param string $sourceFile
+     * @param string $destinationFile
+     * @return \Sg\Processor\Media
+     * @throws \Exception
+     */
     public function copyFile($sourceFile, $destinationFile)
     {
         if(false === is_file($sourceFile))
