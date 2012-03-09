@@ -6,7 +6,17 @@
         "symfony/finder":           ">=2.0.10,<2.1-dev",
         "twig/twig":                "1.6.1",
         "kriswallsmith/assetic":    "1.0.3",
-        "knplabs/knp-menu":         "1.0"
+        "knplabs/knp-menu":         "1.0",
+        "lessphp":                  [
+            {
+                "type":             "git",
+                "url":              "git://github.com/leafo/lessphp.git",
+                "reference":        "master"
+            },
+            {
+                "packagist":        false
+            }
+        ]
     },
     "autoload": {
         "psr-0": {

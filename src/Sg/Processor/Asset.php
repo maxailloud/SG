@@ -5,6 +5,7 @@ namespace Sg\Processor;
 use Assetic\Asset\AssetCollection;
 use Assetic\Asset\FileAsset;
 use Assetic\Asset\GlobAsset;
+use Assetic\Filter\LessphpFilter;
 
 class Asset extends \Sg\Outputter
 {
@@ -20,13 +21,24 @@ class Asset extends \Sg\Outputter
     public function process($sourceDirectory, $destinationDirectory)
     {
         $js = new AssetCollection(array(
-            new GlobAsset($sourceDirectory . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . '*'),
-            new FileAsset($sourceDirectory . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'script.js'),
-        ));
+                new GlobAsset($sourceDirectory . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . '*'),
+                new FileAsset($sourceDirectory . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'script.js'),
+            )
+        );
 
-//         the code is merged when the asset is dumped
+        //the code is merged when the asset is dumped
         echo "<pre>";
         var_dump($js->dump());
+        echo "</pre>" . PHP_EOL;
+
+        $css = new AssetCollection(array(
+                new FileAsset($sourceDirectory . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'style.less', array(new LessphpFilter())),
+                new GlobAsset($sourceDirectory . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'css' . DIRECTORY_SEPARATOR . '*'),
+            )
+        );
+        // this will echo CSS compiled by LESS and compressed by YUI
+        echo "<pre>";
+        var_dump($css->dump());
         echo "</pre>" . PHP_EOL;
         die("SSSSSTTTTTTOOOOOOPPPPPPP" . PHP_EOL);
 
