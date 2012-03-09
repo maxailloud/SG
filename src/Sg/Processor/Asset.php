@@ -6,7 +6,7 @@ use Assetic\Asset\AssetCollection;
 use Assetic\Asset\FileAsset;
 use Assetic\Asset\GlobAsset;
 
-class Media extends \Sg\Outputter
+class Asset extends \Sg\Outputter
 {
     /** @var \Symfony\Component\Finder\Finder */
     private $finder = null;
@@ -15,31 +15,31 @@ class Media extends \Sg\Outputter
      * @param $sourceDirectory
      * @param $destinationDirectory
      * @throws \Exception
-     * @return \Sg\Processor\Media
+     * @return \Sg\Processor\Asset
      */
     public function process($sourceDirectory, $destinationDirectory)
     {
         $js = new AssetCollection(array(
-            new GlobAsset($sourceDirectory . DIRECTORY_SEPARATOR . 'media' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . '*'),
-            new FileAsset($sourceDirectory . DIRECTORY_SEPARATOR . 'media' . DIRECTORY_SEPARATOR . 'script.js'),
+            new GlobAsset($sourceDirectory . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . '*'),
+            new FileAsset($sourceDirectory . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'script.js'),
         ));
 
-        // the code is merged when the asset is dumped
+//         the code is merged when the asset is dumped
         echo "<pre>";
         var_dump($js->dump());
         echo "</pre>" . PHP_EOL;
         die("SSSSSTTTTTTOOOOOOPPPPPPP" . PHP_EOL);
 
-        $mediaDirectory = $sourceDirectory . DIRECTORY_SEPARATOR . 'media';
+        $assetDirectory = $sourceDirectory . DIRECTORY_SEPARATOR . 'asset';
 
-        if(false === is_dir($mediaDirectory))
+        if(false === is_dir($assetDirectory))
         {
-            $this->writeResult(self::OUTPUT_COMMENT, 'No media directory found.');
+            $this->writeResult(self::OUTPUT_COMMENT, 'No asset directory found.');
             return $this;
         }
 
         $this->finder   = new \Symfony\Component\Finder\Finder();
-        $files          = $this->finder->depth(0)->in($mediaDirectory);
+        $files          = $this->finder->depth(0)->in($assetDirectory);
 
         foreach($files as $file)
         {
@@ -82,7 +82,7 @@ class Media extends \Sg\Outputter
      * @param string $sourceDirectory
      * @param string $destinationDirectory
      * @throws \Exception
-     * @return \Sg\Processor\Media
+     * @return \Sg\Processor\Asset
      */
     public function copyDirectory($sourceDirectory, $destinationDirectory)
     {
@@ -134,7 +134,7 @@ class Media extends \Sg\Outputter
     /**
      * @param string $sourceFile
      * @param string $destinationFile
-     * @return \Sg\Processor\Media
+     * @return \Sg\Processor\Asset
      * @throws \Exception
      */
     public function copyFile($sourceFile, $destinationFile)
@@ -151,7 +151,7 @@ class Media extends \Sg\Outputter
             throw new \Exception(sprintf("An error occured while %s '%s'.", (true === $destinationFileExists) ? 'modifying' : 'adding', $destinationFile));
         }
 
-        $this->writeResult(self::OUTPUT_OK, sprintf('Media file %s : %s', (true === $destinationFileExists) ? 'modified' : 'added', $destinationFile));
+        $this->writeResult(self::OUTPUT_OK, sprintf('Asset file %s : %s', (true === $destinationFileExists) ? 'modified' : 'added', $destinationFile));
 
         return $this;
     }

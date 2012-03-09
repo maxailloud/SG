@@ -46,8 +46,8 @@ class Generator extends \Sg\Outputter
             $templateProcessor = new \Sg\Processor\Template($this->getOutput());
             $templateProcessor->process($this->sourceDirectory, $this->destinationDirectory);
 
-            $mediaProcessor = new \Sg\Processor\Media($this->getOutput());
-            $mediaProcessor->process($this->sourceDirectory, $this->destinationDirectory);
+            $assetProcessor = new \Sg\Processor\Asset($this->getOutput());
+            $assetProcessor->process($this->sourceDirectory, $this->destinationDirectory);
         }
         catch(\Exception $exception)
         {
