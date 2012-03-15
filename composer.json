@@ -1,4 +1,18 @@
 {
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "leafo/lessphp",
+                "version": "0.3.3",
+                "source": {
+                    "url": "git://github.com/leafo/lessphp.git",
+                    "type": "git",
+                    "reference": "v0.3.3"
+                }
+            }
+        }
+    ],
     "require": {
         "php":                      ">=5.3",
         "symfony/console":          ">=2.0.10,<2.1-dev",
@@ -7,16 +21,7 @@
         "twig/twig":                "1.6.1",
         "kriswallsmith/assetic":    "1.0.3",
         "knplabs/knp-menu":         "1.0",
-        "lessphp":                  [
-            {
-                "type":             "git",
-                "url":              "git://github.com/leafo/lessphp.git",
-                "reference":        "master"
-            },
-            {
-                "packagist":        false
-            }
-        ]
+        "leafo/lessphp":            "0.3.3"
     },
     "autoload": {
         "psr-0": {

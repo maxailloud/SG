@@ -20,11 +20,15 @@ class Generator extends \Sg\Outputter
      * @param string $sourceDirectory
      * @param string $destinationDirectory
      */
-    public function __construct(Component\Console\Output\OutputInterface $output, $sourceDirectory, $destinationDirectory)
+    public function __construct(Component\Console\Output\OutputInterface $output, $sourceDirectory, $destinationDirectory = null)
     {
         parent::__construct($output);
-        $this->sourceDirectory      = (DIRECTORY_SEPARATOR === substr($sourceDirectory, -1)) ? substr($sourceDirectory, 0, -1) : $sourceDirectory;
-        $this->destinationDirectory = (DIRECTORY_SEPARATOR === substr($destinationDirectory, -1)) ? substr($destinationDirectory, 0, -1) : $destinationDirectory;
+
+        $sourceDirectory = (DIRECTORY_SEPARATOR === substr($sourceDirectory, -1)) ? substr($sourceDirectory, 0, -1) : $sourceDirectory;
+        $destinationDirectory = (DIRECTORY_SEPARATOR === substr($destinationDirectory, -1)) ? substr($destinationDirectory, 0, -1) : $destinationDirectory;
+
+        $this->sourceDirectory      = (null !== $destinationDirectory) ? $sourceDirectory : $sourceDirectory . DIRECTORY_SEPARATOR . '.sg';
+        $this->destinationDirectory = (null !== $destinationDirectory) ? $destinationDirectory : $sourceDirectory;
     }
 
     /**

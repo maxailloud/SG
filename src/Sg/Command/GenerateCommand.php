@@ -15,15 +15,18 @@ class GenerateCommand extends BaseCommand
         $this
             ->setName('generate')
             ->setDescription('Generation command')
-            ->addArgument('sourceDirectory', InputArgument::REQUIRED, 'The source directory')
-            ->addArgument('destinationDirectory', InputArgument::REQUIRED, 'The destination directory')
+            ->addArgument('sourceDirectory', InputArgument::REQUIRED, 'The source directory (and the destination directory too if destination directory not specified)')
+            ->addArgument('destinationDirectory', InputArgument::OPTIONAL, 'The destination directory')
             ->setHelp(<<<EOT
-The <info>generate</info> command generates your files into the given directory.
+The <info>generate</info> command generates from your files in the source directory to the destination directory.
+
+<info>php sg generate source destination</info>
+
+The target directory will be created if it doesn't exists, and the files will be generated into it.
 
 <info>php sg generate directory</info>
 
-The target directory will be created if it doesn't exists, and the
-files will be generated into it.
+If just one directory is given the generation files must be in a <comment>'directory/.sg'</comment> directory.
 
 EOT
             )
