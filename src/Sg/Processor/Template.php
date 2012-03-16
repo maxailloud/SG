@@ -2,8 +2,25 @@
 
 namespace Sg\Processor;
 
+use Symfony\Component;
+use Sg\Template\Configuration as TemplateConfiguration;
+
 class Template extends \Sg\Outputter
 {
+    /** @var bool */
+    private $managingAssets = false;
+
+    /**
+     * @param Component\Console\Output\OutputInterface $output
+     * @param bool $managingAssets
+     */
+    public function __construct(Component\Console\Output\OutputInterface $output, $managingAssets)
+    {
+        parent::__construct($output);
+
+        $this->managingAssets = $managingAssets;
+    }
+
     /**
      * @param string $sourceDirectory
      * @param string $destinationDirectory
@@ -22,12 +39,31 @@ class Template extends \Sg\Outputter
 
         foreach($files as $file)
         {
-            $template = $twig->loadTemplate('pages' . DIRECTORY_SEPARATOR . $file->getFileName());
+            $template = new \Sg\Template($this->getOutput());
+            $template
+                ->setTemplate($twig->loadTemplate('pages' . DIRECTORY_SEPARATOR . $file->getFileName()))
+                ->setName($file->getBasename('.' . $file->getExtension()))
+            ;
 
-            $destinationFile        = $destinationDirectory . DIRECTORY_SEPARATOR . str_replace(array('pages' . DIRECTORY_SEPARATOR, '.twig'), array('', '.html'), $template->getTemplateName());
+            if(true === $this->managingAssets)
+            {
+                $template->manageAssets($sourceDirectory, $destinationDirectory);
+            }
+
+//            die("FFFFFUUUUUCCCCCKKKKK" . PHP_EOL);
+
+            $destinationFile        = $destinationDirectory . DIRECTORY_SEPARATOR . str_replace(array('pages' . DIRECTORY_SEPARATOR, '.twig'), array('', '.html'), $template->getTemplate()->getTemplateName());
             $destinationFileExists  = is_file($destinationFile);
 
-            if(false === file_put_contents($destinationFile, $twig->render('layout.twig', array('content' => $template->render(array())))))
+            $fileContent = $twig->render('layout.twig', array(
+                    'content'       => $template->getTemplate()->render(array()),
+                    'stylesheets'   => $template->getStylesheets(),
+                    'javascript'    => $template->getJavascript()
+                )
+            );
+
+
+            if(false === file_put_contents($destinationFile, $fileContent))
             {
                 throw new \Exception(sprintf("An error occured while creating file '%s'", $destinationFile));
             }

@@ -2,7 +2,7 @@
 
 namespace Sg;
 
-use \Symfony\Component;
+use Symfony\Component;
 
 class Outputter
 {

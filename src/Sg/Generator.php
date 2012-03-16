@@ -2,33 +2,34 @@
 
 namespace Sg;
 
-use \Symfony\Component;
+use Symfony\Component;
 
 class Generator extends \Sg\Outputter
 {
-    const OUTPUT_OK         = '[<info>OK</info>]';
-    const OUTPUT_FAIL       = '[<error>FAIL</error>]';
-    const OUTPUT_COMMENT    = '[<comment>FAIL</comment>]';
-
     private $sourceDirectory        = null;
     private $destinationDirectory   = null;
     private $layoutFile             = null;
     private $pageDirectory          = null;
 
+    private $configuration = null;
+
     /**
      * @param \Symfony\Component\Console\Output\OutputInterface $output
      * @param string $sourceDirectory
      * @param string $destinationDirectory
+     * @return \Sg\Generator
      */
     public function __construct(Component\Console\Output\OutputInterface $output, $sourceDirectory, $destinationDirectory = null)
     {
         parent::__construct($output);
 
-        $sourceDirectory = (DIRECTORY_SEPARATOR === substr($sourceDirectory, -1)) ? substr($sourceDirectory, 0, -1) : $sourceDirectory;
-        $destinationDirectory = (DIRECTORY_SEPARATOR === substr($destinationDirectory, -1)) ? substr($destinationDirectory, 0, -1) : $destinationDirectory;
+        $sourceDirectory        = (DIRECTORY_SEPARATOR === substr($sourceDirectory, -1)) ? substr($sourceDirectory, 0, -1) : $sourceDirectory;
+        $destinationDirectory   = (DIRECTORY_SEPARATOR === substr($destinationDirectory, -1)) ? substr($destinationDirectory, 0, -1) : $destinationDirectory;
 
         $this->sourceDirectory      = (null !== $destinationDirectory) ? $sourceDirectory : $sourceDirectory . DIRECTORY_SEPARATOR . '.sg';
         $this->destinationDirectory = (null !== $destinationDirectory) ? $destinationDirectory : $sourceDirectory;
+
+        $this->configuration = new Configuration($this->sourceDirectory);
     }
 
     /**
@@ -47,11 +48,15 @@ class Generator extends \Sg\Outputter
                 ->checkPagesDirectory()
             ;
 
-            $templateProcessor = new \Sg\Processor\Template($this->getOutput());
-            $templateProcessor->process($this->sourceDirectory, $this->destinationDirectory);
+            $assets = $this->configuration->getOption('assets');
+            if(false === $assets)
+            {
+                $assetProcessor = new \Sg\Processor\Asset($this->getOutput());
+                $assetProcessor->process($this->sourceDirectory, $this->destinationDirectory);
+            }
 
-            $assetProcessor = new \Sg\Processor\Asset($this->getOutput());
-            $assetProcessor->process($this->sourceDirectory, $this->destinationDirectory);
+            $templateProcessor = new \Sg\Processor\Template($this->getOutput(), $assets);
+            $templateProcessor->process($this->sourceDirectory, $this->destinationDirectory);
         }
         catch(\Exception $exception)
         {
