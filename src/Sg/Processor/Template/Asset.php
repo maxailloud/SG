@@ -10,42 +10,22 @@ use Assetic\Filter\LessphpFilter;
 
 class Asset extends BaseAsset
 {
-    private $source = null;
-    private $destination = null;
-
-    /**
-     * @param string $source
-     * @return \Sg\Processor\Template\Asset
-     */
-    public function setSource($source)
-    {
-        $this->source = $source;
-
-        return $this;
-    }
-    /**
-     * @param string $destination
-     * @return \Sg\Processor\Template\Asset
-     */
-    public function setDestination($destination)
-    {
-        $this->destination = $destination;
-
-        return $this;
-    }
-
     /**
      * @param string $templateName
      */
     public function processForTemplate($templateName)
     {
-        $this->processStyleSheet($templateName);
-        $this->processJavascript($templateName);
+        $assetPath = array(
+            $this->processStyleSheet($templateName),
+            $this->processJavascript($templateName)
+        );
+
+        return $assetPath;
     }
 
     /**
-     * @param $sourceDirectory
-     * @param $destinationDirectory
+     * @param string $templateName
+     * @return string
      */
     public function processStyleSheet($templateName)
     {
@@ -73,11 +53,13 @@ class Asset extends BaseAsset
             throw new \Exception(sprintf("Unable to create asset file '%s'", $assetFile));
         }
         $this->writeResult(self::OUTPUT_OK, sprintf("Asset file %s : %s", (true === $assetFileExists) ? 'modified' : 'added', $assetFile));
+
+        return $assetFile;
     }
 
     /**
-     * @param string $sourceDirectory
-     * @param string $destinationDirectory
+     * @param string $templateName
+     * @return string
      */
     public function processJavascript($templateName)
     {
@@ -85,12 +67,6 @@ class Asset extends BaseAsset
                 new GlobAsset($this->source . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . '*'),
             )
         );
-
-        // the code is merged when the asset is dumped
-//        echo "<pre>";
-//        var_dump($js->dump());
-//        echo "</pre>" . PHP_EOL;
-//        die("SSSSSTTTTTTOOOOOOPPPPPPP" . PHP_EOL);
 
         $javascriptDirectory = $this->destination . DIRECTORY_SEPARATOR . 'js';
 
@@ -111,5 +87,7 @@ class Asset extends BaseAsset
             throw new \Exception(sprintf("Unable to create asset file '%s'", $assetFile));
         }
         $this->writeResult(self::OUTPUT_OK, sprintf("Asset file %s : %s", (true === $assetFileExists) ? 'modified' : 'added', $assetFile));
+
+        return $assetFile;
     }
 }

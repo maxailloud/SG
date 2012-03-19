@@ -23,8 +23,8 @@ class Generator extends \Sg\Outputter
     {
         parent::__construct($output);
 
-        $sourceDirectory        = (DIRECTORY_SEPARATOR === substr($sourceDirectory, -1)) ? substr($sourceDirectory, 0, -1) : $sourceDirectory;
-        $destinationDirectory   = (DIRECTORY_SEPARATOR === substr($destinationDirectory, -1)) ? substr($destinationDirectory, 0, -1) : $destinationDirectory;
+        $sourceDirectory        = realpath($sourceDirectory);
+        $destinationDirectory   = (null !== $destinationDirectory) ? realpath($destinationDirectory) : null;
 
         $this->sourceDirectory      = (null !== $destinationDirectory) ? $sourceDirectory : $sourceDirectory . DIRECTORY_SEPARATOR . '.sg';
         $this->destinationDirectory = (null !== $destinationDirectory) ? $destinationDirectory : $sourceDirectory;
@@ -55,8 +55,8 @@ class Generator extends \Sg\Outputter
                 $assetProcessor->process($this->sourceDirectory, $this->destinationDirectory);
             }
 
-            $templateProcessor = new \Sg\Processor\Template($this->getOutput(), $assets);
-            $templateProcessor->process($this->sourceDirectory, $this->destinationDirectory);
+            $templateProcessor = new \Sg\Processor\Template($this->getOutput());
+            $templateProcessor->process($this->sourceDirectory, $this->destinationDirectory, $assets);
         }
         catch(\Exception $exception)
         {
