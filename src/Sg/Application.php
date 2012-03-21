@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the Symfony package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Sg;
 
 use Symfony\Component\Console\Application as BaseApplication;
@@ -18,9 +9,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 
 /**
- * Application.
+ * SG application.
  *
- * @author Fabien Potencier <fabien@symfony.com>
  */
 class Application extends BaseApplication
 {
@@ -30,6 +20,8 @@ class Application extends BaseApplication
     public function __construct()
     {
         parent::__construct('SG', Sg::VERSION);
+
+        $this->getDefinition()->addOption(new InputOption('--licence', '-l', InputOption::VALUE_NONE, 'Display the licence of the application.'));
     }
 
     /**
@@ -43,6 +35,12 @@ class Application extends BaseApplication
     public function doRun(InputInterface $input, OutputInterface $output)
     {
         $this->registerCommands();
+
+        if (true === $input->hasParameterOption(array('--licence', '-l'))) {
+            $output->writeln(file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '../../LICENCE'));
+
+            return 0;
+        }
 
         return parent::doRun($input, $output);
     }

@@ -7,11 +7,11 @@ try
     $phar = new \Phar(__DIR__ . '/../../../sg.phar');
     $phar->setMetadata(
         array(
-            'version' => Sg\Sg::VERSION,
-            'author' => 'Maxime AILLOUD',
-            'support' => 'maxime@maximeailloud.fr',
-            'description' => 'Static site generator',
-            'licence' => 'Do what the fuck you want with it !!!'
+            'version'       => Sg\Sg::VERSION,
+            'author'        => 'Maxime AILLOUD',
+            'support'       => 'maxime.ailloud@gmail.com',
+            'description'   => 'Static site generator',
+            'licence'       => 'DO WHAT THE FUCK YOU WANT TO !!!'
         )
     );
 
