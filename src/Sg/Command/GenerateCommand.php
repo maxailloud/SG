@@ -39,8 +39,6 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $verbose = $input->getOption('verbose');
-
         $generator = new \Sg\Generator($output, $input->getArgument('sourceDirectory'), $input->getArgument('destinationDirectory'));
         $generator
             ->setOutput($output)
