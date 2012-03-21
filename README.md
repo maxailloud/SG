@@ -46,4 +46,4 @@ To generate your site you can use the sources instead, or if you want to develop
 License
 -------
 
-SG is licensed under the WTFPL License - see the LICENSE file for details
+SG is licensed under the WTFPL License - see the LICENCE file for details
