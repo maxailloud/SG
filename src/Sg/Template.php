@@ -246,7 +246,7 @@ class Template extends \Sg\Outputter
             ->setDestination($destinationDirectory)
         ;
 
-        list($this->stylesheetPath, $this->javascriptPath) = $assetProcessor->processForTemplate($this->getName());
+        list($this->stylesheetPath, $this->javascriptPath) = $assetProcessor->processForTemplate($this->getName(), $this->configuration);
 
         return $this;
     }

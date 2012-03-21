@@ -17,10 +17,40 @@ class Configuration
 
     /**
      * @param string $name
-     * @return string
+     * @return null|string
      */
     public function getOption($name)
     {
         return (null !== $this->options && isset($this->options[$name])) ? $this->options[$name] : null;
+    }
+
+    /**
+     * @return null|array
+     */
+    public function getStylesheets()
+    {
+        $assets = $this->getOption('assets');
+        $stylesheets = null;
+        if(null !== $assets)
+        {
+            $stylesheets = (true === array_key_exists('stylesheets', $assets)) ? $assets['stylesheets'] : null;;
+        }
+
+        return $stylesheets;
+    }
+
+    /**
+     * @return null|array
+     */
+    public function getJavascripts()
+    {
+        $assets = $this->getOption('assets');
+        $stylesheets = null;
+        if(null !== $assets)
+        {
+            $stylesheets = (true === array_key_exists('javascripts', $assets)) ? $assets['javascripts'] : null;;
+        }
+
+        return $stylesheets;
     }
 }

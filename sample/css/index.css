@@ -1,4 +1,12 @@
-body { background-color:black; }
-
-body { background-color:black; }
-body div { background-color:red; }
+body
+{
+    background-color: black;
+}
+body
+{
+    background-color: blue;
+}
+body
+{
+    background-color: green;
+}

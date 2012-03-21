@@ -12,12 +12,14 @@ class Asset extends BaseAsset
 {
     /**
      * @param string $templateName
+     * @param \Sg\Template\Configuration $templateConfiguration
+     * @return array
      */
-    public function processForTemplate($templateName)
+    public function processForTemplate($templateName, $templateConfiguration)
     {
         $assetPath = array(
-            $this->processStyleSheet($templateName),
-            $this->processJavascript($templateName)
+            $this->processStyleSheet($templateName, $templateConfiguration->getStylesheets()),
+            $this->processJavascript($templateName, $templateConfiguration->getJavascripts())
         );
 
         return $assetPath;
@@ -25,14 +27,18 @@ class Asset extends BaseAsset
 
     /**
      * @param string $templateName
+     * @param array $stylesheets
      * @return string
      */
-    public function processStyleSheet($templateName)
+    public function processStyleSheet($templateName, $stylesheets)
     {
-        $css = new AssetCollection(array(
-                new GlobAsset($this->source . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'css' . DIRECTORY_SEPARATOR . '*', array(new LessphpFilter())),
-            )
-        );
+        $assets = array();
+        foreach($stylesheets as $stylesheet)
+        {
+            $assets[] = new FileAsset($this->source . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . $stylesheet);
+        }
+
+        $css = new AssetCollection($assets);
 
         $stylesheetDirectory = $this->destination . DIRECTORY_SEPARATOR . 'css';
 
@@ -59,34 +65,43 @@ class Asset extends BaseAsset
 
     /**
      * @param string $templateName
+     * @param array $javascripts
      * @return string
      */
-    public function processJavascript($templateName)
+    public function processJavascript($templateName, $javascripts)
     {
-        $js = new AssetCollection(array(
-                new GlobAsset($this->source . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . '*'),
-            )
-        );
+        $assetFile = null;
 
-        $javascriptDirectory = $this->destination . DIRECTORY_SEPARATOR . 'js';
-
-        if(false === is_dir($javascriptDirectory))
+        if(null !== $javascripts)
         {
-            if(false === mkdir($javascriptDirectory))
+            $assets = array();
+            foreach($javascripts as $javascript)
             {
-                throw new \Exception(sprintf("Unable to create javascript directory '%s'", $javascriptDirectory));
+                $assets[] = new FileAsset($this->source . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . $javascript);
             }
+
+            $js = new AssetCollection($assets);
+
+            $javascriptDirectory = $this->destination . DIRECTORY_SEPARATOR . 'js';
+
+            if(false === is_dir($javascriptDirectory))
+            {
+                if(false === mkdir($javascriptDirectory))
+                {
+                    throw new \Exception(sprintf("Unable to create javascript directory '%s'", $javascriptDirectory));
+                }
+            }
+
+            $assetFile = $javascriptDirectory . DIRECTORY_SEPARATOR . $templateName . '.js';
+
+            $assetFileExists = is_file($assetFile);
+
+            if(false === file_put_contents($assetFile, $js->dump()))
+            {
+                throw new \Exception(sprintf("Unable to create asset file '%s'", $assetFile));
+            }
+            $this->writeResult(self::OUTPUT_OK, sprintf("Asset file %s : %s", (true === $assetFileExists) ? 'modified' : 'added', $assetFile));
         }
-
-        $assetFile = $javascriptDirectory . DIRECTORY_SEPARATOR . $templateName . '.js';
-
-        $assetFileExists = is_file($assetFile);
-
-        if(false === file_put_contents($assetFile, $js->dump()))
-        {
-            throw new \Exception(sprintf("Unable to create asset file '%s'", $assetFile));
-        }
-        $this->writeResult(self::OUTPUT_OK, sprintf("Asset file %s : %s", (true === $assetFileExists) ? 'modified' : 'added', $assetFile));
 
         return $assetFile;
     }

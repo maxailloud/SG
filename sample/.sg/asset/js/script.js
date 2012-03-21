@@ -1,1 +1,1 @@
-console.log('pouet');
+console.log('script');
