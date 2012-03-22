@@ -18,7 +18,7 @@
         "symfony/console":          "=2.0.10,<2.1-dev",
         "symfony/yaml":             ">=2.0.10,<2.1-dev",
         "symfony/finder":           ">=2.0.10,<2.1-dev",
-        "twig/twig":                "1.6.1",
+        "twig/twig":                "1.6.3",
         "kriswallsmith/assetic":    "1.0.3",
         "knplabs/knp-menu":         "1.0",
         "leafo/lessphp":            "0.3.3"

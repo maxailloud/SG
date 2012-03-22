@@ -5,6 +5,11 @@ namespace Sg\Command;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Base command class.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 abstract class BaseCommand extends SymfonyCommand
 {
     /**

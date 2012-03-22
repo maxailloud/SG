@@ -4,6 +4,11 @@ namespace Sg\Template;
 
 use \Symfony\Component;
 
+/**
+ * Template configuration class.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 class Configuration
 {
     /** @var array */

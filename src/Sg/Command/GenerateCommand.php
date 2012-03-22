@@ -8,8 +8,16 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Generate site command class.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 class GenerateCommand extends SymfonyCommand
 {
+    /**
+     * @return void
+     */
     protected function configure()
     {
         $this
@@ -39,8 +47,6 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $verbose = $input->getOption('verbose');
-
         $generator = new \Sg\Generator($output, $input->getArgument('sourceDirectory'), $input->getArgument('destinationDirectory'));
         $generator
             ->setOutput($output)

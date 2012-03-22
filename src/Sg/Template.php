@@ -4,6 +4,11 @@ namespace Sg;
 
 use Symfony\Component;
 
+/**
+ * Template class.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 class Template extends \Sg\Outputter
 {
     const CONFIGURATION_SEPARATOR   = '===';
