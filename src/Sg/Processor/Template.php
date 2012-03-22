@@ -5,6 +5,11 @@ namespace Sg\Processor;
 use Symfony\Component;
 use Sg\Template\Configuration as TemplateConfiguration;
 
+/**
+ * Template processor class.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 class Template extends \Sg\Outputter
 {
     /**

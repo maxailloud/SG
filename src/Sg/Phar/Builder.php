@@ -2,6 +2,11 @@
 
 namespace Sg\Phar;
 
+/**
+ * Builder of the PHAR archive class.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 class Builder extends \Sg\Outputter
 {
     /**
@@ -14,9 +19,18 @@ class Builder extends \Sg\Outputter
             throw new \RuntimeException('Phar extension is mandatory to use this PHAR');
         }
 
+        $pharFile = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'sg.phar';
+
+        if(is_file($pharFile))
+        {
+            unlink($pharFile);
+        }
+
         try
         {
-            $phar = new \Phar(__DIR__ . '/../../../sg.phar', 0, 'sg.phar');
+            $phar = new \Phar($pharFile, 0, 'sg.phar');
+            $phar->startBuffering();
+
             $phar->setMetadata(
                 array(
                     'version'       => \Sg\Sg::VERSION,
@@ -27,18 +41,13 @@ class Builder extends \Sg\Outputter
                 )
             );
 
-            $stubFilePath = __DIR__ . DIRECTORY_SEPARATOR . 'Resources' . DIRECTORY_SEPARATOR . 'stub.php';
-            if(false === is_file($stubFilePath))
-            {
-                throw new \Exception('Unable to find stub file');
-            }
-
-            $phar->setStub(file_get_contents($stubFilePath));
+            $phar->setStub($this->getStub());
 
             $baseDirectory = __DIR__ . '/../../..';
 
             $phar->buildFromIterator($this->getDirectoryIterator($baseDirectory), $baseDirectory);
-//            $phar->buildFromDirectory($baseDirectory);
+
+            $phar->stopBuffering();
 
             $this->writeResult(self::OUTPUT_OK, 'PHAR archive generated');
         }
@@ -49,6 +58,25 @@ class Builder extends \Sg\Outputter
     }
 
     /**
+     * @return string
+     */
+    public function getStub()
+    {
+        return <<<'STUB'
+<?php
+
+Phar::mapPhar('sg.phar');
+
+require_once 'phar://sg.phar/vendor/.composer/autoload.php';
+
+$console = new \Sg\Application('SG', \Sg\Sg::VERSION);
+$console->run();
+
+__HALT_COMPILER();
+STUB;
+    }
+
+    /**
      * @param string $directory
      * @return \Iterator
      */
@@ -56,7 +84,7 @@ class Builder extends \Sg\Outputter
     {
         $fileFinder = new \Symfony\Component\Finder\Finder();
         $fileFinder
-//            ->name('LICENCE')
+            ->files()
             ->ignoreVCS(true)
             ->exclude('.idea')
             ->notName('sg.phar')
@@ -65,35 +93,6 @@ class Builder extends \Sg\Outputter
             ->notName('PharCommand.php')
             ->in($directory)
         ;
-
-        foreach($fileFinder as $file)
-        {
-            if(true === is_dir($file))
-            {
-                if('.composer' === $file->getFileName())
-                {
-                    echo "<pre>";
-                    var_dump(realpath($file->getPathname()));
-                    echo "</pre>" . PHP_EOL;
-                }
-                if('vendor' === $file->getFileName())
-                {
-                    echo "<pre>";
-                    var_dump(realpath($file->getPathname()));
-                    echo "</pre>" . PHP_EOL;
-                }
-            }
-            if(true === is_file($file))
-            {
-                if('autoload.php' === $file->getFileName())
-                {
-                    echo "<pre>";
-                    var_dump(realpath($file->getPathname()));
-                    echo "</pre>" . PHP_EOL;
-                }
-            }
-        }
-
 
         return $fileFinder->getIterator();
     }

@@ -3,8 +3,5 @@
 
 require_once __DIR__. '/vendor/.composer/autoload.php';
 
-use Sg\Application;
-use Sg\Sg;
-
-$console = new Application('SG', Sg::VERSION);
+$console = new \Sg\Application('SG', \Sg\Sg::VERSION);
 $console->run();

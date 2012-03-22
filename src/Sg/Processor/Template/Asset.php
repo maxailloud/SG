@@ -8,6 +8,11 @@ use Assetic\Asset\FileAsset;
 use Assetic\Asset\GlobAsset;
 use Assetic\Filter\LessphpFilter;
 
+/**
+ * Asset processor class for Template.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 class Asset extends BaseAsset
 {
     /**
@@ -28,37 +33,43 @@ class Asset extends BaseAsset
     /**
      * @param string $templateName
      * @param array $stylesheets
-     * @return string
+     * @return null|string
+     * @throws \Exception
      */
     public function processStyleSheet($templateName, $stylesheets)
     {
-        $assets = array();
-        foreach($stylesheets as $stylesheet)
+        $assetFile = null;
+
+        if(null !== $stylesheets)
         {
-            $assets[] = new FileAsset($this->source . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . $stylesheet);
-        }
-
-        $css = new AssetCollection($assets);
-
-        $stylesheetDirectory = $this->destination . DIRECTORY_SEPARATOR . 'css';
-
-        if(false === is_dir($stylesheetDirectory))
-        {
-            if(false === mkdir($stylesheetDirectory))
+            $assets = array();
+            foreach($stylesheets as $stylesheet)
             {
-                throw new \Exception(sprintf("Unable to create stylesheet directory '%s'", $stylesheetDirectory));
+                $assets[] = new FileAsset($this->source . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . $stylesheet);
             }
+
+            $css = new AssetCollection($assets);
+
+            $stylesheetDirectory = $this->destination . DIRECTORY_SEPARATOR . 'css';
+
+            if(false === is_dir($stylesheetDirectory))
+            {
+                if(false === mkdir($stylesheetDirectory))
+                {
+                    throw new \Exception(sprintf("Unable to create stylesheet directory '%s'", $stylesheetDirectory));
+                }
+            }
+
+            $assetFile = $stylesheetDirectory . DIRECTORY_SEPARATOR . $templateName . '.css';
+
+            $assetFileExists = is_file($assetFile);
+
+            if(false === file_put_contents($assetFile, $css->dump()))
+            {
+                throw new \Exception(sprintf("Unable to create asset file '%s'", $assetFile));
+            }
+            $this->writeResult(self::OUTPUT_OK, sprintf("Asset file %s : %s", (true === $assetFileExists) ? 'modified' : 'added', $assetFile));
         }
-
-        $assetFile = $stylesheetDirectory . DIRECTORY_SEPARATOR . $templateName . '.css';
-
-        $assetFileExists = is_file($assetFile);
-
-        if(false === file_put_contents($assetFile, $css->dump()))
-        {
-            throw new \Exception(sprintf("Unable to create asset file '%s'", $assetFile));
-        }
-        $this->writeResult(self::OUTPUT_OK, sprintf("Asset file %s : %s", (true === $assetFileExists) ? 'modified' : 'added', $assetFile));
 
         return $assetFile;
     }
@@ -66,7 +77,8 @@ class Asset extends BaseAsset
     /**
      * @param string $templateName
      * @param array $javascripts
-     * @return string
+     * @return null|string
+     * @throws \Exception
      */
     public function processJavascript($templateName, $javascripts)
     {

@@ -4,13 +4,26 @@ namespace Sg;
 
 use Symfony\Component;
 
+/**
+ * Generator class.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 class Generator extends \Sg\Outputter
 {
+    /** @var null|string */
     private $sourceDirectory        = null;
+
+    /** @var null|string */
     private $destinationDirectory   = null;
+
+    /** @var null|string */
     private $layoutFile             = null;
+
+    /** @var null|string */
     private $pageDirectory          = null;
 
+    /** @var null|\Sg\Configuration */
     private $configuration = null;
 
     /**
@@ -92,8 +105,6 @@ class Generator extends \Sg\Outputter
     }
 
     /**
-     * Check if the 'pages' directory exists in the source directory
-     *
      * @return \Sg\Generator
      * @throws \Exception
      */
@@ -118,7 +129,7 @@ class Generator extends \Sg\Outputter
 
     /**
      * @return \Sg\Generator
-     * @throws \InvalidArgumentException
+     * @throws \Exception
      */
     public function checkSourceDirectory()
     {
@@ -139,7 +150,7 @@ class Generator extends \Sg\Outputter
 
     /**
      * @return \Sg\Generator
-     * @throws \InvalidArgumentException
+     * @throws \Exception
      */
     public function checkDestinationDirectory()
     {

@@ -4,6 +4,11 @@ namespace Sg;
 
 use Symfony\Component;
 
+/**
+ * Outputter class.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 class Outputter
 {
     const OUTPUT_OK         = '[<info>OK</info>]';

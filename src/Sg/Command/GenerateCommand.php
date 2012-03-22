@@ -8,8 +8,16 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Generate site command class.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 class GenerateCommand extends SymfonyCommand
 {
+    /**
+     * @return void
+     */
     protected function configure()
     {
         $this

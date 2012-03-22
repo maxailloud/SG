@@ -4,9 +4,17 @@ namespace Sg\Processor;
 
 use Symfony\Component;
 
+/**
+ * Asset processor class.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 class Asset extends \Sg\Outputter
 {
+    /** @var string|null */
     protected $source = null;
+
+    /** @var string|null */
     protected $destination = null;
 
     /**

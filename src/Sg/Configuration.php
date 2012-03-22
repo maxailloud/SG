@@ -4,6 +4,11 @@ namespace Sg;
 
 use \Symfony\Component;
 
+/**
+ * Global configuration.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 class Configuration
 {
     /** @var array */

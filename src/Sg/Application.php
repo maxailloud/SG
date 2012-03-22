@@ -9,8 +9,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 
 /**
- * SG application.
+ * Main application.
  *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
  */
 class Application extends BaseApplication
 {
@@ -51,7 +52,7 @@ class Application extends BaseApplication
     protected function registerCommands()
     {
         $finder = new Finder();
-        $finder->files()->name('*Command.php')->in(__DIR__ . '/Command');
+        $finder->files()->name('*Command.php')->in(__DIR__ . DIRECTORY_SEPARATOR . 'Command');
 
         foreach($finder as $file)
         {

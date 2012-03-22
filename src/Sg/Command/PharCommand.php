@@ -6,8 +6,16 @@ use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Phar generation command class.
+ *
+ * @author Maxime AILLOUD <maxime.ailloud@gmail.com>
+ */
 class PharCommand extends SymfonyCommand
 {
+    /**
+     * @return void
+     */
     protected function configure()
     {
         $this
