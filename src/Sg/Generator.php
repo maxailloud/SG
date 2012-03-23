@@ -50,7 +50,7 @@ class Generator extends \Sg\Outputter
      */
     public function generate()
     {
-        $this->writeln("<comment>Starting static site generation.</comment>");
+        $this->outputln("<comment>Starting static site generation.</comment>");
 
         try
         {
@@ -73,10 +73,51 @@ class Generator extends \Sg\Outputter
         }
         catch(\Exception $exception)
         {
-            $this->writeResult(self::OUTPUT_FAIL, $exception->getMessage());
+            $this->outputResult(self::OUTPUT_FAIL, $exception->getMessage());
         }
 
-        $this->writeln("<comment>Static site generation done.</comment>");
+        $this->outputln("<comment>Static site generation done.</comment>");
+    }
+
+    /**
+     * @return \Sg\Generator
+     * @throws \Exception
+     */
+    public function cleanFiles()
+    {
+        $finder = new \Symfony\Component\Finder\Finder();
+        $files = $finder->files()->exclude('.sg')->in($this->destinationDirectory);
+
+        $directories = array();
+
+        /** @var \Symfony\Component\Finder\SplFileInfo $file */
+        foreach($files as $file)
+        {
+            $filePath = $file->getPathName();
+            if(true === is_dir($filePath))
+            {
+                $directories[] = $filePath;
+            }
+            else
+            {
+                if(false === unlink($filePath))
+                {
+                    throw new \Exception(sprintf("Unable to delete '%s' file.", $filePath));
+                }
+            }
+        }
+
+        foreach($directories as $directory)
+        {
+            if(false === rmdir($directory))
+            {
+                throw new \Exception(sprintf("Unable to delete '%s' directory.", $directory));
+            }
+        }
+
+        $this->outputln('<comment>Cleaning files done.</comment>');
+
+        return $this;
     }
 
     /**
@@ -99,7 +140,7 @@ class Generator extends \Sg\Outputter
             throw new \Exception(sprintf("The layout file '%s' cannot be read.", $this->layoutFile));
         }
 
-        $this->writeResult(self::OUTPUT_OK, sprintf('Layout file : %s', $this->layoutFile));
+        $this->outputResult(self::OUTPUT_OK, sprintf('Layout file : %s', $this->layoutFile));
 
         return $this;
     }
@@ -122,7 +163,7 @@ class Generator extends \Sg\Outputter
             throw new \Exception(sprintf("The page directory '%s' cannot be read.", $this->pageDirectory));
         }
 
-        $this->writeResult(self::OUTPUT_OK, sprintf('Page directory : %s', $this->pageDirectory));
+        $this->outputResult(self::OUTPUT_OK, sprintf('Page directory : %s', $this->pageDirectory));
 
         return $this;
     }
@@ -143,7 +184,7 @@ class Generator extends \Sg\Outputter
             throw new \Exception(sprintf("The directory '%s' cannot be read.", $this->sourceDirectory));
         }
 
-        $this->writeResult(self::OUTPUT_OK, sprintf('Source directory : %s', $this->sourceDirectory));
+        $this->outputResult(self::OUTPUT_OK, sprintf('Source directory : %s', $this->sourceDirectory));
 
         return $this;
     }
@@ -169,7 +210,7 @@ class Generator extends \Sg\Outputter
             throw new \Exception(sprintf("You don't have the right permission to write into the destination directory '%s'.", $this->destinationDirectory));
         }
 
-        $this->writeResult(self::OUTPUT_OK, sprintf('Destination directory : %s', $this->destinationDirectory));
+        $this->outputResult(self::OUTPUT_OK, sprintf('Destination directory : %s', $this->destinationDirectory));
 
         return $this;
     }

@@ -49,11 +49,11 @@ class Builder extends \Sg\Outputter
 
             $phar->stopBuffering();
 
-            $this->writeResult(self::OUTPUT_OK, 'PHAR archive generated');
+            $this->outputResult(self::OUTPUT_OK, 'PHAR archive generated');
         }
         catch(Exception $exception)
         {
-            $this->writeResult(self::OUTPUT_FAIL, sprintf('An error occured when generating the PHAR archive %s'), $exception->getMessage());
+            $this->outputResult(self::OUTPUT_FAIL, sprintf('An error occured when generating the PHAR archive %s'), $exception->getMessage());
         }
     }
 

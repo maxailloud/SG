@@ -45,7 +45,7 @@ class Asset extends BaseAsset
             $assets = array();
             foreach($stylesheets as $stylesheet)
             {
-                $assets[] = new FileAsset($this->source . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . $stylesheet);
+                $assets[] = new FileAsset($this->source . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . $stylesheet, array(new \Assetic\Filter\LessphpFilter()));
             }
 
             $css = new AssetCollection($assets);
@@ -68,7 +68,7 @@ class Asset extends BaseAsset
             {
                 throw new \Exception(sprintf("Unable to create asset file '%s'", $assetFile));
             }
-            $this->writeResult(self::OUTPUT_OK, sprintf("Asset file %s : %s", (true === $assetFileExists) ? 'modified' : 'added', $assetFile));
+            $this->outputResult(self::OUTPUT_OK, sprintf("Asset file %s : %s", (true === $assetFileExists) ? 'modified' : 'added', $assetFile));
         }
 
         return $assetFile;
@@ -112,7 +112,7 @@ class Asset extends BaseAsset
             {
                 throw new \Exception(sprintf("Unable to create asset file '%s'", $assetFile));
             }
-            $this->writeResult(self::OUTPUT_OK, sprintf("Asset file %s : %s", (true === $assetFileExists) ? 'modified' : 'added', $assetFile));
+            $this->outputResult(self::OUTPUT_OK, sprintf("Asset file %s : %s", (true === $assetFileExists) ? 'modified' : 'added', $assetFile));
         }
 
         return $assetFile;

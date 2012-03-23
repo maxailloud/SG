@@ -51,7 +51,7 @@ class Outputter
      * @param int $type
      * @return Generator
      */
-    public function writeResult($result, $message, $type = 0)
+    public function outputResult($result, $message, $type = 0)
     {
         $writeMessage = sprintf("%s - %s", str_pad($result, 19, ' ', \STR_PAD_RIGHT), $message);
         $this->output->writeln($writeMessage, $type);
@@ -62,7 +62,7 @@ class Outputter
      * @param bool $newline
      * @param int $type
      */
-    public function write($messages, $newline = false, $type = 0)
+    public function output($messages, $newline = false, $type = 0)
     {
         $this->output->write($messages, $newline, $type);
     }
@@ -71,8 +71,8 @@ class Outputter
      * @param string $messages
      * @param int $type
      */
-    public function writeln($messages, $type = 0)
+    public function outputln($messages, $type = 0)
     {
-        $this->write($messages, true, $type);
+        $this->output($messages, true, $type);
     }
 }

@@ -1,12 +1,5 @@
-body
-{
-    background-color: black;
-}
-body
-{
-    background-color: blue;
-}
-body
-{
-    background-color: green;
-}
+body { background-color:black; }
+
+body { background-color:blue; }
+
+body { background-color:green; }

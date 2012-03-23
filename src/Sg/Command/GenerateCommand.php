@@ -25,6 +25,7 @@ class GenerateCommand extends SymfonyCommand
             ->setDescription('Generation command')
             ->addArgument('sourceDirectory', InputArgument::REQUIRED, 'The source directory (and the destination directory too if destination directory not specified)')
             ->addArgument('destinationDirectory', InputArgument::OPTIONAL, 'The destination directory')
+            ->addOption('regenerate', 'R', InputOption::VALUE_NONE, 'If specified delete all previously generate files before generation')
             ->setHelp(<<<EOT
 The <info>generate</info> command generates from your files in the source directory to the destination directory.
 
@@ -48,9 +49,14 @@ EOT
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $generator = new \Sg\Generator($output, $input->getArgument('sourceDirectory'), $input->getArgument('destinationDirectory'));
-        $generator
-            ->setOutput($output)
-            ->generate()
-        ;
+
+        $generator->setOutput($output);
+
+        if(true === $input->getOption('regenerate'))
+        {
+            $generator->cleanFiles();
+        }
+
+        $generator->generate();
     }
 }

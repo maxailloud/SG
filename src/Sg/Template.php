@@ -107,19 +107,19 @@ class Template extends \Sg\Outputter
     }
 
     /**
-     * @return null|string
+     * @return string
      */
     public function getStylesheetPath()
     {
-        return sprintf(self::INCLUDE_STYLESHEET, $this->stylesheetPath);
+        return (null === $this->stylesheetPath) ? '' : sprintf(self::INCLUDE_STYLESHEET, $this->stylesheetPath);
     }
 
     /**
-     * @return null|string
+     * @return string
      */
     public function getJavascriptPath()
     {
-        return sprintf(self::INCLUDE_JAVASCRIPT, $this->javascriptPath);
+        return (null === $this->javascriptPath) ? '' : sprintf(self::INCLUDE_JAVASCRIPT, $this->javascriptPath);
     }
 
     /**
@@ -284,6 +284,6 @@ class Template extends \Sg\Outputter
             throw new \Exception(sprintf("An error occured while creating file '%s'", $destinationFile));
         }
 
-        $this->writeResult(self::OUTPUT_OK, sprintf('File %s : %s', $destinationFileExists ? 'modified' : 'added', $destinationFile));
+        $this->outputResult(self::OUTPUT_OK, sprintf('File %s : %s', $destinationFileExists ? 'modified' : 'added', $destinationFile));
     }
 }

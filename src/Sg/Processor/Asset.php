@@ -22,7 +22,7 @@ class Asset extends \Sg\Outputter
 
     /**
      * @param string $source
-     * @return \Sg\Processor\Template\Asset
+     * @return \Sg\Processor\Asset
      */
     public function setSource($source)
     {
@@ -32,7 +32,7 @@ class Asset extends \Sg\Outputter
     }
     /**
      * @param string $destination
-     * @return \Sg\Processor\Template\Asset
+     * @return \Sg\Processor\Asset
      */
     public function setDestination($destination)
     {
@@ -47,50 +47,69 @@ class Asset extends \Sg\Outputter
      */
     public function process($sourceDirectory, $destinationDirectory)
     {
+        // Process stylesheet assets
         $stylesheetSourceDirectory = $sourceDirectory . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'css';
-        $this->checkDirectory($stylesheetSourceDirectory);
 
-        $stylesheetDestinationDirectory = $destinationDirectory . DIRECTORY_SEPARATOR . 'css';
-        $this->checkDirectory($stylesheetDestinationDirectory, true);
+        if(true === is_dir($stylesheetSourceDirectory))
+        {
+            $stylesheetDestinationDirectory = $destinationDirectory . DIRECTORY_SEPARATOR . 'css';
 
-        $stylesheetGlobAsset = new GlobAsset($stylesheetSourceDirectory . DIRECTORY_SEPARATOR . '*');
-        echo "<pre>";
-        var_dump($stylesheetGlobAsset->dump());
-        echo "</pre>" . PHP_EOL;
-        $stylesheetAssetManager = new AssetManager();
-        $stylesheetAssetManager->set('css', $stylesheetGlobAsset);
+            $stylesheetFinder   = new \Symfony\Component\Finder\Finder();
+            $stylesheets              = $stylesheetFinder->files()->in($stylesheetSourceDirectory);
 
-        $stylesheetWriter = new AssetWriter($stylesheetDestinationDirectory);
-        $stylesheetWriter->writeManagerAssets($stylesheetAssetManager);
+            /** @var \Symfony\Component\Finder\SplFileInfo $stylesheet */
+            foreach($stylesheets as $stylesheet)
+            {
+                $assetFile = $stylesheetDestinationDirectory . DIRECTORY_SEPARATOR . str_replace('.less', '.css', $stylesheet->getRelativePathname());
+                $assetFileExists = is_file($assetFile);
 
-        $this->writeResult(self::OUTPUT_OK, 'Asset file of the site treated.');
+                $asset = new FileAsset($stylesheetSourceDirectory . DIRECTORY_SEPARATOR . $stylesheet->getRelativePathname(), array(new \Assetic\Filter\LessphpFilter()));
+
+                $this->write($assetFile, $asset->dump());
+                $this->outputResult(self::OUTPUT_OK, sprintf("Asset file %s : %s", (true === $assetFileExists) ? 'modified' : 'added', $assetFile));
+            }
+        }
+
+        // Process javascript assets
+        $javascriptSourceDirectory = $sourceDirectory . DIRECTORY_SEPARATOR . 'asset' . DIRECTORY_SEPARATOR . 'js';
+
+        if(true === is_dir($javascriptSourceDirectory))
+        {
+            $javascriptDestinationDirectory = $destinationDirectory . DIRECTORY_SEPARATOR . 'js';
+
+            $javascriptFinder   = new \Symfony\Component\Finder\Finder();
+            $javascripts        = $javascriptFinder->files()->in($javascriptSourceDirectory);
+
+            /** @var \Symfony\Component\Finder\SplFileInfo $javascript */
+            foreach($javascripts as $javascript)
+            {
+                $assetFile = $javascriptDestinationDirectory . DIRECTORY_SEPARATOR . $javascript->getRelativePathname();
+                $assetFileExists = is_file($assetFile);
+
+                $asset = new FileAsset($javascriptSourceDirectory . DIRECTORY_SEPARATOR . $javascript->getRelativePathname());
+
+                $this->write($assetFile, $asset->dump());
+                $this->outputResult(self::OUTPUT_OK, sprintf("Asset file %s : %s", (true === $assetFileExists) ? 'modified' : 'added', $assetFile));
+            }
+        }
     }
 
-
     /**
-     * @param string $directory
-     * @param bool $writable
+     * @param string $path
+     * @param string $contents
      * @return \Sg\Processor\Asset
-     * @throws \Exception
+     * @throws \RuntimeException
      */
-    public function checkDirectory($directory, $writable = false)
+    public function write($path, $contents)
     {
-        if(false === is_dir($directory))
+        if(false === is_dir($directory = dirname($path)) && false === mkdir($directory, 0777, true))
         {
-            throw new \Exception(sprintf("The directory '%s' doesn't exist.", $directory));
+            throw new \RuntimeException(sprintf("Unable to create directory '%s'.", $directory));
         }
 
-        if(false === is_readable($directory))
+        if(false === file_put_contents($path, $contents))
         {
-            throw new \Exception(sprintf("The directory '%s' cannot be read.", $directory));
-        }
-
-        if(true === $writable)
-        {
-            if(false === is_writable($directory))
-            {
-                throw new \Exception(sprintf("You don't have the right permission to write into the directory '%s'.", $this->destinationDirectory));
-            }
+            throw new \RuntimeException(sprintf("Unable to write file '%s'", $path));
         }
 
         return $this;
