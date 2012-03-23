@@ -37,6 +37,9 @@ The target directory will be created if it doesn't exists, and the files will be
 
 If just one directory is given the generation files must be in a <comment>'directory/.sg'</comment> directory.
 
+To delete all files before generation, include the <comment>--regenerate (-R)</comment> option:
+
+<info>php sg generate --regenerate(-R) directory</info>
 EOT
             )
         ;
