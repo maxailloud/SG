@@ -28,15 +28,15 @@ class Generator extends \Sg\Outputter
 
     /**
      * @param \Symfony\Component\Console\Output\OutputInterface $output
-     * @param string $sourceDirectory
-     * @param string $destinationDirectory
+     * @param null|string $sourceDirectory
+     * @param null|string $destinationDirectory
      * @return \Sg\Generator
      */
-    public function __construct(Component\Console\Output\OutputInterface $output, $sourceDirectory, $destinationDirectory = null)
+    public function __construct(Component\Console\Output\OutputInterface $output, $sourceDirectory = null, $destinationDirectory = null)
     {
         parent::__construct($output);
 
-        $sourceDirectory        = realpath($sourceDirectory);
+        $sourceDirectory        = (null === $sourceDirectory) ? realpath('.') : realpath($sourceDirectory);
         $destinationDirectory   = (null !== $destinationDirectory) ? realpath($destinationDirectory) : null;
 
         $this->sourceDirectory      = (null !== $destinationDirectory) ? $sourceDirectory : $sourceDirectory . DIRECTORY_SEPARATOR . '.sg';
@@ -68,15 +68,16 @@ class Generator extends \Sg\Outputter
                 $assetProcessor->process($this->sourceDirectory, $this->destinationDirectory);
             }
 
-            $templateProcessor = new \Sg\Processor\Template($this->getOutput());
+            $templateProcessor = new Processor\Template($this->getOutput());
             $templateProcessor->process($this->sourceDirectory, $this->destinationDirectory, $assets);
+
+            $this->outputln("<comment>Static site generation done.</comment>");
         }
         catch(\Exception $exception)
         {
             $this->outputResult(self::OUTPUT_FAIL, $exception->getMessage());
         }
 
-        $this->outputln("<comment>Static site generation done.</comment>");
     }
 
     /**
@@ -86,7 +87,7 @@ class Generator extends \Sg\Outputter
     public function cleanFiles()
     {
         $finder = new \Symfony\Component\Finder\Finder();
-        $files = $finder->files()->exclude('.sg')->in($this->destinationDirectory);
+        $files = $finder->files()->notName('sg.phar')->exclude('.sg')->in($this->destinationDirectory);
 
         $directories = array();
 
