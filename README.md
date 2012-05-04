@@ -1,4 +1,4 @@
-SG - Static site generator in PHP
+SG - Static site generator in PHP (WIP)
 =====================================
 
 SG is a static site generator made with php.
